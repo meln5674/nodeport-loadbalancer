@@ -21,7 +21,7 @@ config:
 replicaCount: 1
 
 image:
-  registry: gchr.io
+  registry: ghcr.io
   repository: meln5674/nodeport-loadbalancer
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.

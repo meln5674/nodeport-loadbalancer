@@ -3,6 +3,7 @@ package main_test
 import (
 	"context"
 	"os"
+	"path/filepath"
 	"testing"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -34,27 +35,33 @@ var _ = BeforeSuite(func() {
 })
 
 var (
+	localbin     = os.Getenv("LOCALBIN")
+	localKubectl = gingk8s.KubectlCommand{
+		Command: []string{filepath.Join(localbin, "kubectl")},
+	}
+	localHelm = gingk8s.HelmCommand{
+		Command: []string{filepath.Join(localbin, "helm")},
+	}
+	localKind = gingk8s.KindCommand{
+		Command: []string{filepath.Join(localbin, "kind")},
+	}
+
 	gk8s     gingk8s.Gingk8s
 	gk8sOpts = gingk8s.SuiteOpts{
-		KLogFlags: []string{"-v=11"},
-		// Kubectl:   localKubectl,
-		// Helm: &gingk8s.HelmCommand{
-		// 	Command: []string{localbin + "helm"},
-		// },
-		// Manifests: localKubectl,
-		// NoSuiteCleanup: true,
+		KLogFlags:      []string{"-v=6"},
+		Kubectl:        &localKubectl,
+		Helm:           &localHelm,
+		Manifests:      &localKubectl,
+		NoSuiteCleanup: os.Getenv("NODEPORT_LOADBALANCER_IT_DEV_MODE") != "",
 		NoCacheImages:  os.Getenv("IS_CI") != "",
 		NoPull:         os.Getenv("IS_CI") != "",
 		NoLoadPulled:   os.Getenv("IS_CI") != "",
-		NoSuiteCleanup: os.Getenv("NODEPORT_LOADBALANCER_IT_DEV_MODE") != "",
 	}
 
 	cluster = gingk8s.KindCluster{
-		Name: "nodeport-loadbalancer-it",
-		// KindCommand: &gingk8s.KindCommand{
-		// 	Command: []string{"bin/kind"},
-		// },
-		TempDir: "tmp",
+		Name:        "nodeport-loadbalancer-it",
+		KindCommand: &localKind,
+		TempDir:     "tmp",
 	}
 	clusterID gingk8s.ClusterID
 

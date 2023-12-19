@@ -33,8 +33,12 @@ var _ = Describe("NodePort LoadBalancer", func() {
 		Expect(port.Error).To(BeNil())
 		Expect(port.Port).ToNot(BeZero())
 
-		resp, err := http.Get(fmt.Sprintf("http://%s:%d", ingress.IP, port.Port))
-		Expect(err).ToNot(HaveOccurred())
+		var resp *http.Response
+		var err error
+		Eventually(func() error {
+			resp, err = http.Get(fmt.Sprintf("http://%s:%d", ingress.IP, port.Port))
+			return err
+		}, "5s", "500ms").Should(Succeed())
 		defer resp.Body.Close()
 		_, err = io.Copy(GinkgoWriter, resp.Body)
 		Expect(err).To(Succeed())
